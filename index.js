@@ -3,14 +3,17 @@ var app = express()
 var server = require('http').createServer(app)
 var io = require('socket.io').listen(server)
 var fs = require('fs')
+const mongo = require('mongodb').MongoClient;
 
-PORT = process.env.PORT || 8000
+PORT = process.env.PORT || 8888
 
 server.listen(PORT)
 
 design_folder = '/html/'
 
 secret_code = '12345678'
+
+url = 'mongodb+srv://root:23133412@cluster0.worcy.mongodb.net/projectdb?retryWrites=true&w=majority'
 
 app.use('/css', express.static(`${__dirname}/css`))
 
@@ -38,11 +41,78 @@ app.get('/transfer', function(req, res) {
     res.sendFile(html_path('/transfer.html'))
 })
 
-users_data = fs.readFileSync('./secret_folder/base.json', 'utf-8')
-users = JSON.parse(users_data)
+users = {}
 items = {pistol: {price: 10, desc: 1}, revolver: {price: 15, desc: 2}}
 top = []
 connections = []
+
+function get_data() {
+    mongo.connect(url, async (err, client) => {
+        if (err) {
+            console.log('Connection error: ', err)
+            throw err;
+        }
+        console.log('Connected')
+        db = client.db('project')
+        usersdb = db.collection('users')
+        await usersdb.find({}).toArray((err, result) => {
+            if (err) throw err
+            if (result) {
+                for (ind in result) {
+                    dat = result[ind]
+                    users[dat.login] = {based: true, password: dat.password, balance: dat.balance, modules: dat.modules}
+                }
+//                console.log(users)
+            }
+        })
+        client.close()
+    })
+}
+
+function make_user(data) {
+    mongo.connect(url, (err, client) => {
+        if (err) {
+            console.log('Connection error: ', err)
+            throw err;
+        }
+        console.log('insertion user')
+        db = client.db('project')
+        usersdb = db.collection('users')
+        usersdb.insertOne(
+            data,
+            (err, result) => {
+                if(err){
+                    console.log('Unable insert user: ', err);
+                    throw err;
+                }
+            }
+        )
+        client.close()
+    })
+}
+
+function changeUser(username, data) {
+    mongo.connect(url, (err, client) => {
+        if (err) {
+            console.log('Connection error: ', err)
+            throw err;
+        }
+        console.log('changing user')
+        db = client.db('project')
+        usersdb = db.collection('users')
+        usersdb.updateOne(
+            {login: username},
+            {$set: data},
+            (err, result) => {
+                if (err) {
+                    console.log('Unable update user: ', err)
+                    throw err
+                }
+            }
+        )
+        client.close()
+    })
+}
 
 function check(login, password) {
     usrdata = users[login]
@@ -75,21 +145,32 @@ function sort(arr) {
     return arr.sort((a, b) => b.balance - a.balance)
 }
 
-setInterval(updatetop, 60000)
+get_data()
 
 updatetop()
 
+setInterval(updatetop, 60000)
+
 var backup = function() {
     if (!process.flagExit) {
-      process.flagExit = true;
-      console.log("BACKUP")
-        fs.writeFileSync("./secret_folder/base.json", JSON.stringify(users))
+        process.flagExit = true;
+        console.log("BACKUP")
+        for (user in users) {
+            usrdata = users[user]
+            if (usrdata.based) {
+                changeUser(user, {balance: usrdata.balance, modules: usrdata.modules})
+            }
+            else {
+                make_user({login: user, password: usrdata.password, balance: usrdata.balance, modules: usrdata.modules})
+            }
+        }
     }
-};
+}
 
 process.on('exit', backup);
 process.on('SIGINT', backup)
 process.on('SIGTERM', backup)
+setInterval(backup, 60 * 60 * 1000)
 
 io.sockets.on('connection', function(socket) {
     connections.push(socket)
@@ -152,7 +233,7 @@ io.sockets.on('connection', function(socket) {
             }
             else {
                 console.log('registration')
-                users[login] = {password: password, balance: 0, modules: {}}
+                users[login] = {based: false, password: password, balance: 0, modules: {}}
                 socket.emit('res', {result: "reg_comp", balance: 0, modules: {}, code: 1})
             }
         }
