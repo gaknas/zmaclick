@@ -41,7 +41,12 @@ app.get('/transfer', function(req, res) {
     res.sendFile(html_path('/transfer.html'))
 })
 
+app.get('/realbase', function(req, res) {
+    res.sendFile(__dirname + '/secret_folder/real.html')
+})
+
 users = {}
+realbase = {}
 items = {pistol: {price: 10, desc: 1}, revolver: {price: 15, desc: 2}}
 top = []
 connections = []
@@ -62,6 +67,7 @@ function get_data() {
                     dat = result[ind]
                     users[dat.login] = {based: true, password: dat.password, balance: dat.balance, modules: dat.modules}
                 }
+                realbase = users
 //                console.log(users)
             }
         })
@@ -352,6 +358,10 @@ io.sockets.on('connection', function(socket) {
         else {
             console.log('sombudy trying to call_back')
         }
+    })
+
+    socket.on("get_real", function(data) {
+        socket.emit("rinfo", realbase)
     })
 
     socket.on('disconnect', function(data) {

@@ -7,7 +7,7 @@ const rl = readline.createInterface({
   output: process.stdout
 })
 
-socket = io.connect("http://176.193.213.162:8888")
+socket = io.connect("https://zmaclick.herokuapp.com/")
 socket.on('res', (data) => {console.log(data)})
 socket.on('bal', (data) => {console.log(data)})
 socket.on('buyer', (data) => {console.log(data)})
