@@ -4,7 +4,9 @@ var server = require('http').createServer(app)
 var io = require('socket.io').listen(server)
 var fs = require('fs')
 
-server.listen(8888)
+PORT = process.env.PORT || 8000
+
+server.listen(PORT)
 
 design_folder = '/html/'
 
