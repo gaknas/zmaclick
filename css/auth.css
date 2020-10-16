@@ -1,0 +1,23 @@
+.auth{
+	display: flex;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background: #0008;
+	justify-content: center;
+	align-items: center;
+	z-index: 54;
+}
+.auth form{
+	display: block;
+	padding: 2vw 5vw;background-color: #333;
+	box-shadow: 0 0 2vw black;
+	border-radius: 1.5vw;
+	font-size: 5vw;
+	cursor: default;
+}
+.auth h2{
+	margin: 16px 0 32px;
+}

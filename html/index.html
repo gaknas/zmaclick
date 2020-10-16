@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ZMACLICK - здарова, зяблс!</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link rel="stylesheet" href="/css/general.css">
+	<link rel="stylesheet" href="/css/auth.css">
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+</head>
+<body>
+	<div class="auth">
+		<form id='registerForm'>
+			<h2>Здарова, зяблс!</h2>
+			<div class="form-group">
+				<input class="form-control" type="login" id="login" placeholder="Ну, по классике, логин..." required>
+				<div class="invalid-feedback">Чет я тебя не припомню</div>
+			</div>
+			<div class="form-group">
+				<input class="form-control" type="password" id="password" placeholder="...и пароль" required>
+			</div>
+			<div class="form-group">
+				<input class="btn btn-primary" type="submit" id="signin" value="Кароч погнали">
+			</div>
+		</form>
+	</div>
+	<script src="/js/auth.js"></script>
+</body>
+</html>
