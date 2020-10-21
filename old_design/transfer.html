@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var login = localStorage.getItem('login')
+        var password = localStorage.getItem('password')
+        var socket = io.connect()
+        if (!(login && password)) {
+	        window.location.replace("/register")
+        }
+        socket.on('tresult', function(data) {
+            console.log(data)
+            if (data.res == 1) {
+                $("#bal").text("BALANCE: " + data.balance + "CL")
+            }
+            else {
+                alert(data.data)
+            }
+        })
+    </script>
+    <title>CLICKER</title>
+  </head>
+  <body>
+    <h1>CLICKMATE!</h1>
+    <br>
+    <h3>TRANSFER</h3>
+    <p type="text" id="bal"></p>
+    <input type="submit" value="BACK" onclick="window.location.replace('/')">
+    <br>
+    <br>
+    <input type="text" id="target" placeholder="target_name">
+    <input type="text" id="amount" placeholder="amount">
+    <button onclick="transfer()">DO IT NOW!</button>
+    <script>
+	    socket.on('res', function(data) {
+            console.log(data)
+            if (data.code == 1) {
+                $("#bal").text("BALANCE: " + data.balance + " CL")
+            }
+            else {
+                $("#bal").text("BALANCE: 0 CL")
+                alert(data.result)
+            }
+        })
+        socket.emit('auth', {auth: {login: login, password: password}})
+        function transfer() {
+            var $target = $("#target")
+            var $amount = $("#amount")
+            socket.emit('transfer', {target: $target.val(), amount: $amount.val(), auth: {login: login, password: password}})
+        }
+    </script>
+  </body>
+</html>

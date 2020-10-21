@@ -8,6 +8,7 @@ const rl = readline.createInterface({
 })
 
 socket = io.connect("https://zmaclick.herokuapp.com/")
+//socket = io.connect("http://127.0.0.1:8888/")
 socket.on('res', (data) => {console.log(data)})
 socket.on('bal', (data) => {console.log(data)})
 socket.on('buyer', (data) => {console.log(data)})
@@ -28,5 +29,8 @@ rl.on('line', (input) => {
   }
   else if (command[0] == 'backup') {
     socket.emit('back', {secret_code: secret_code})
+  }
+  else if (command[0] == 'wipe') {
+    socket.emit('wipe', {target: command[1], secret_code: secret_code})
   }
 })

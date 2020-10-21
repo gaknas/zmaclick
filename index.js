@@ -67,6 +67,7 @@ function get_data() {
                     users[dat.login] = {based: true, password: dat.password, balance: dat.balance, modules: dat.modules}
                 }
 //                console.log(users)
+                updatetop()
             }
         })
         client.close()
@@ -123,6 +124,10 @@ function check(login, password) {
     return (usrdata.password == password)
 }
 
+function wipe(login) {
+    users[login] = {based: false, password: users[login].password, balance: 0, modules: {}}
+}
+
 function html_path(filename) {
     return __dirname + '/' + design_folder + '/' + filename
 }
@@ -150,8 +155,6 @@ function sort(arr) {
 }
 
 get_data()
-
-updatetop()
 
 setInterval(updatetop, 60000)
 
@@ -299,6 +302,10 @@ io.sockets.on('connection', function(socket) {
         else if (!('amount' in data)) {
             console.log('no amount')
         }
+        else if (data['amount'] < 0) {
+            console.log("<0")
+            socket.emit('tresult', {data: "< 0", res: 6})
+        }
         else {
             login = data.auth.login
             password = data.auth.password
@@ -355,6 +362,28 @@ io.sockets.on('connection', function(socket) {
         }
         else {
             console.log('sombudy trying to call_back')
+        }
+    })
+
+    socket.on('wipe', function(data) {
+        console.log("WIPE", data)
+        if (!data) {
+            console.log('somebody trying to WIPE')
+        }
+        else if (!('target' in data)) {
+            console.log('no target')
+        }
+        else if (!('secret_code' in data)) {
+            console.log('somebody trying to call_back')
+        }
+        else {
+            if (data['secret_code'] == secret_code) {
+                wipe(data.target)
+                console.log(users[data.terget])
+            }
+            else {
+                console.log('!!!WRONG CODE!!!')
+            }
         }
     })
 
